@@ -1,1 +1,1 @@
-hdfs.jsr203.HadoopFileSystemProvider
+dbfs.jsr203.HadoopFileSystemProvider

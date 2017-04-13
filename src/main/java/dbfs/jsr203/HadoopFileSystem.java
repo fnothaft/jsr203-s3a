@@ -92,29 +92,15 @@ public class HadoopFileSystem extends FileSystem {
 
 	public HadoopFileSystem(FileSystemProvider provider, String host, int uriPort) throws IOException {
 		
-		this.provider = provider;
-		
-		int port = uriPort;
-		if (port == -1) {
-		  port = 8020; // Default Hadoop port
-		}
-
-		// Create dynamic configuration
-		Configuration conf = new Configuration();
-    if (host == null) {
-      String defaultScheme =
-          org.apache.hadoop.fs.FileSystem.getDefaultUri(conf).getScheme();
-      if (!"hdfs".equals(defaultScheme)) {
-        throw new NullPointerException("Null host not permitted if default " +
-            "Hadoop filesystem is not HDFS.");
-      }
-    } else {
-      conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
-    }
-
-        this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
-        
-        this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
+            this.provider = provider;
+            
+            // Create dynamic configuration
+            Configuration conf = new Configuration();
+            conf.set("fs.defaultFS", "dbfs:///");
+            
+            this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
+            
+            this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
 	}
 	
 	private final void beginWrite() {
