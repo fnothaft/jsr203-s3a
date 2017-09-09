@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
+package net.fnothaft.s3a.jsr203;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -96,7 +96,7 @@ public class HadoopFileSystem extends FileSystem {
             
             // Create dynamic configuration
             Configuration conf = new Configuration();
-            conf.set("fs.defaultFS", "dbfs:///");
+            conf.set("fs.defaultFS", "s3a://" + host);
             
             this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
             

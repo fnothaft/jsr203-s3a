@@ -13,26 +13,37 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
+package net.fnothaft.s3a.jsr203;
 
-import java.nio.file.attribute.GroupPrincipal;
-
-import org.apache.hadoop.security.UserGroupInformation;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 
 /**
- * Implement {@link GroupPrincipal}.
+ * Implementation for {@link WatchEvent}.
  */
-public class HadoopGroupPrincipal implements GroupPrincipal {
+public class HadoopCreateWatchEvent implements WatchEvent<Path> {
 
-  private UserGroupInformation ugi;
+  private Path path;
+  private WatchEvent.Kind<Path> kind;
 
-  public HadoopGroupPrincipal(HadoopFileSystem hdfs, String name) {
-    this.ugi = UserGroupInformation.createRemoteUser(name);
+  HadoopCreateWatchEvent(Path path, WatchEvent.Kind<Path> kind) {
+    this.path = path;
+    this.kind = kind;
   }
 
   @Override
-  public String getName() {
-    return this.ugi.getUserName();
+  public WatchEvent.Kind<Path> kind() {
+    return this.kind;
+  }
+
+  @Override
+  public int count() {
+    return 1;
+  }
+
+  @Override
+  public Path context() {
+    return this.path;
   }
 
 }

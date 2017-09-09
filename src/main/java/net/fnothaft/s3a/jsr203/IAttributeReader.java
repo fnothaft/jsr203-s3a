@@ -13,37 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
+package net.fnothaft.s3a.jsr203;
 
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
+import java.io.IOException;
+import java.nio.file.LinkOption;
+import java.util.Map;
 
 /**
- * Implementation for {@link WatchEvent}.
+ * Interface to manage attributes views (reading).
  */
-public class HadoopCreateWatchEvent implements WatchEvent<Path> {
-
-  private Path path;
-  private WatchEvent.Kind<Path> kind;
-
-  HadoopCreateWatchEvent(Path path, WatchEvent.Kind<Path> kind) {
-    this.path = path;
-    this.kind = kind;
-  }
-
-  @Override
-  public WatchEvent.Kind<Path> kind() {
-    return this.kind;
-  }
-
-  @Override
-  public int count() {
-    return 1;
-  }
-
-  @Override
-  public Path context() {
-    return this.path;
-  }
-
+public interface IAttributeReader {
+  Map<String, Object> readAttributes(String attributes, LinkOption[] options)
+      throws IOException;
 }

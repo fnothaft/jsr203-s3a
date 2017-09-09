@@ -13,17 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
-
-import java.io.IOException;
-import java.nio.file.LinkOption;
 
 /**
- * Interface to manage attributes views.
+ * Main package for JSR 203 implementation for Apache Hadoop distributed file
+ * system (HDFS).
+ * <p>
+ * Contains the implementation pointed by the actual {@code META-INF/services/}
+ * entry.
  */
-public interface IAttributeWriter {
-
-  void setAttribute(String attr, Object value, LinkOption[] options)
-      throws IOException;
-
-}
+package net.fnothaft.s3a.jsr203;

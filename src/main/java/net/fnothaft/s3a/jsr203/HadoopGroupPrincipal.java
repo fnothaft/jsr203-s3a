@@ -13,16 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
+package net.fnothaft.s3a.jsr203;
 
-import java.io.IOException;
-import java.nio.file.LinkOption;
-import java.util.Map;
+import java.nio.file.attribute.GroupPrincipal;
+
+import org.apache.hadoop.security.UserGroupInformation;
 
 /**
- * Interface to manage attributes views (reading).
+ * Implement {@link GroupPrincipal}.
  */
-public interface IAttributeReader {
-  Map<String, Object> readAttributes(String attributes, LinkOption[] options)
-      throws IOException;
+public class HadoopGroupPrincipal implements GroupPrincipal {
+
+  private UserGroupInformation ugi;
+
+  public HadoopGroupPrincipal(HadoopFileSystem hdfs, String name) {
+    this.ugi = UserGroupInformation.createRemoteUser(name);
+  }
+
+  @Override
+  public String getName() {
+    return this.ugi.getUserName();
+  }
+
 }

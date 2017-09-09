@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dbfs.jsr203;
+package net.fnothaft.s3a.jsr203;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,7 +48,7 @@ import org.apache.hadoop.fs.PathFilter;
  */
 public class HadoopFileSystemProvider extends FileSystemProvider {
 
-  public static final String SCHEME = "dbfs";
+  public static final String SCHEME = "s3a";
 
   // Copy-cat of
   // org.apache.hadoop.mapreduce.lib.input.FileInputFormat.hiddenFileFilter

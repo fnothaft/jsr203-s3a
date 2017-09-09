@@ -1,1 +1,1 @@
-dbfs.jsr203.HadoopFileSystemProvider
+net.fnothaft.s3a.jsr203.HadoopFileSystemProvider
