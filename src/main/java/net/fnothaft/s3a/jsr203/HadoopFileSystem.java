@@ -68,11 +68,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.avro.file.SeekableByteArrayInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.io.IOUtils;
 
 public class HadoopFileSystem extends FileSystem {
 
@@ -437,55 +439,112 @@ public class HadoopFileSystem extends FileSystem {
                 FileStatus e = this.fs.getFileStatus(path);
                 if (e == null || e.isDirectory())
                     throw new NoSuchFileException(path.toString());
-                final FSDataInputStream inputStream = getInputStream(path);
-                final ReadableByteChannel rbc =
-                    Channels.newChannel(inputStream);
                 final long size = e.getLen();
-                return new SeekableByteChannel() {
-                    long read = 0;
-                    public boolean isOpen() {
-                        return rbc.isOpen();
-                    }
+                final int ss = (int)size;
+                final FSDataInputStream fsStream = getInputStream(path);
 
-                    public long position() throws IOException {
-                        return read;
-                    }
-
-                    public SeekableByteChannel position(long pos)
-                        throws IOException
-                    {
-                        // ReadableByteChannel is not buffered, so it reads through
-                        inputStream.seek(pos);
-                        read = pos;
-                        return this;
-                    }
-
-                    public int read(ByteBuffer dst) throws IOException {
-                        int n = rbc.read(dst);
-                        if (n > 0) {
-                            read += n;
+                // if file is less than 1 GB, cache it
+                if (size <= 1024 * 1024 * 1024) {
+                    System.err.println("Reading file " + path + " with size " + size + "(" + ss + ") into memory.");
+                    byte[] bbuf = new byte[ss];
+                    IOUtils.readFully(fsStream, bbuf, 0, ss);
+                    final SeekableByteArrayInput inputStream = new SeekableByteArrayInput(bbuf);
+                    final ReadableByteChannel rbc =
+                            Channels.newChannel(inputStream);
+                    return new SeekableByteChannel() {
+                        long read = 0;
+                        public boolean isOpen() {
+                            return rbc.isOpen();
                         }
-                        return n;
-                    }
 
-                    public SeekableByteChannel truncate(long size)
-                    throws IOException
-                    {
-                        throw new NonWritableChannelException();
-                    }
+                        public long position() throws IOException {
+                            return read;
+                        }
 
-                    public int write (ByteBuffer src) throws IOException {
-                        throw new NonWritableChannelException();
-                    }
+                        public SeekableByteChannel position(long pos)
+                                throws IOException
+                        {
+                            // ReadableByteChannel is not buffered, so it reads through
+                            inputStream.seek(pos);
+                            read = pos;
+                            return this;
+                        }
 
-                    public long size() throws IOException {
-                        return size;
-                    }
+                        public int read(ByteBuffer dst) throws IOException {
+                            int n = rbc.read(dst);
+                            if (n > 0) {
+                                read += n;
+                            }
+                            return n;
+                        }
 
-                    public void close() throws IOException {
-                        rbc.close();
-                    }
-                };
+                        public SeekableByteChannel truncate(long size)
+                                throws IOException
+                        {
+                            throw new NonWritableChannelException();
+                        }
+
+                        public int write (ByteBuffer src) throws IOException {
+                            throw new NonWritableChannelException();
+                        }
+
+                        public long size() throws IOException {
+                            return size;
+                        }
+
+                        public void close() throws IOException {
+                            rbc.close();
+                        }
+                    };
+                } else {
+                    System.err.println("File " + path + " is too large to cache.");
+                    final ReadableByteChannel rbc =
+                            Channels.newChannel(fsStream);
+                    return new SeekableByteChannel() {
+                        long read = 0;
+
+                        public boolean isOpen() {
+                            return rbc.isOpen();
+                        }
+
+                        public long position() throws IOException {
+                            return read;
+                        }
+
+                        public SeekableByteChannel position(long pos)
+                                throws IOException {
+                            // ReadableByteChannel is not buffered, so it reads through
+                            fsStream.seek(pos);
+                            read = pos;
+                            return this;
+                        }
+
+                        public int read(ByteBuffer dst) throws IOException {
+                            int n = rbc.read(dst);
+                            if (n > 0) {
+                                read += n;
+                            }
+                            return n;
+                        }
+
+                        public SeekableByteChannel truncate(long size)
+                                throws IOException {
+                            throw new NonWritableChannelException();
+                        }
+
+                        public int write(ByteBuffer src) throws IOException {
+                            throw new NonWritableChannelException();
+                        }
+
+                        public long size() throws IOException {
+                            return size;
+                        }
+
+                        public void close() throws IOException {
+                            rbc.close();
+                        }
+                    };
+                }
             } finally {
                 endRead();
             }
