@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.fnothaft</groupId>
   <artifactId>jsr203-s3a</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.2</version>
   <name>jsr203-s3a</name>
   <description>A Java NIO file system provider for S3A, using Hadoop FS mechanisms</description>
   
